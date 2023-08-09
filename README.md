@@ -16,7 +16,7 @@ Screenshots
 
 Disclaimer
 -----------------------------------------------------------------------------------
-The DPS Meter image icon is a property of Crate Entertainment and used only to show cohesion with the main game.
+The DPS Meter button icon is a property of Crate Entertainment and used only to show cohesion with the main game.
 
 
 
