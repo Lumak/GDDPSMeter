@@ -11,8 +11,8 @@ Use the batch file in the repo
 Screenshots
 -----------------------------------------------------------------------------------
 
-![alt tag](https://github.com/Lumak/GDDPSMeter/blob/master/screenshot/dpsscrn1.jpg)
-![alt tag](https://github.com/Lumak/GDDPSMeter/blob/master/screenshot/dpsscrn2.jpg)
+![alt tag](https://github.com/Lumak/GDDPSMeter/blob/main/screenshot/dpsscrn1.jpg)
+![alt tag](https://github.com/Lumak/GDDPSMeter/blob/main/screenshot/dpsscrn2.jpg)
 
 Disclaimer
 -----------------------------------------------------------------------------------
