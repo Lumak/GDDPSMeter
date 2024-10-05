@@ -2,8 +2,13 @@
 
 //=============================================================================
 //=============================================================================
+#ifdef X64
+#define VoidArg void *This
+#else
+#define VoidArg void *This, void*
+#endif
+
 typedef void(__thiscall *VoidFn)();
-typedef void (*VoidFnNorm)();
 
 struct DetourFnData
 {
@@ -12,21 +17,30 @@ struct DetourFnData
   VoidFn detourFn_;
   const char *mangleName_;
 };
-struct DetourFnNormalData
-{
-    const char *dllName_;
-    VoidFn realFn_;
-    VoidFnNorm detourFn_;
-    const char *mangleName_;
-};
 
 template <typename R, typename ...Args>
-class RealFunc
+class ThisFunc
 {
 public:
 	typedef R(__thiscall *Fn)(Args...);
 
-	RealFunc() : Fn_(NULL) {};
+	ThisFunc() : Fn_(NULL) {};
+
+	void SetFn(VoidFn rhs)
+	{
+		Fn_ = (Fn)rhs;
+	}
+
+	Fn Fn_;
+};
+
+template <typename R, typename ...Args>
+class CdeclFunc
+{
+public:
+	typedef R(__cdecl *Fn)(Args...);
+
+	CdeclFunc() : Fn_(NULL) {};
 
 	void SetFn(VoidFn rhs)
 	{
@@ -47,11 +61,10 @@ public:
   virtual void Update(void *player, int idx) = 0;
   virtual void SetPlayer(void* player) = 0;
 
-  void SetError(const char *err);
 
 protected:
-    int HookDetour(DetourFnData &detourData);
-    int HookDetour(DetourFnNormalData &detourData);
+  int HookDetour(DetourFnData &detourData);
+  void SetError(const char *err);
 
 };
 

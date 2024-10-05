@@ -19,11 +19,11 @@ DetourFnData datPieOmaticFadeIn = { "engine.dll", NULL, (VoidFn)&DetourScreen::D
 DetourFnData datPieOmaticFadeOut = { "engine.dll", NULL, (VoidFn)&DetourScreen::DTPieOmaticFadeOut, SYM_PIEOMATIC_FADEOUT };
 DetourFnData datGfxCanvasRenderStyledRect = { "engine.dll", NULL, (VoidFn)&DetourScreen::DTGfxCanvasRenderStyledRect, SYM_GFXCANVAS_RENDERSYTLEDRECT };
 
-RealFunc<void, void*, void*, unsigned int> DetourScreen::fnEventManagerSend_;
-RealFunc<void, void*, bool> DetourScreen::fnPieOmaticSetWedgeMode_;
-RealFunc<void, void*> DetourScreen::fnPieOmaticFadeIn_;
-RealFunc<void, void*> DetourScreen::fnPieOmaticFadeOut_;
-RealFunc<void, void*, unsigned int&, unsigned int&, unsigned int&> DetourScreen::fnGfxCanvasRenderStyledRect_;
+ThisFunc<void, void*, void*, unsigned int> DetourScreen::fnEventManagerSend_;
+ThisFunc<void, void*, bool> DetourScreen::fnPieOmaticSetWedgeMode_;
+ThisFunc<void, void*> DetourScreen::fnPieOmaticFadeIn_;
+ThisFunc<void, void*> DetourScreen::fnPieOmaticFadeOut_;
+ThisFunc<void, void*, unsigned int&, unsigned int&, unsigned int&> DetourScreen::fnGfxCanvasRenderStyledRect_;
 
 DetourScreen *DetourScreen::sDetourScreen_ = NULL;
 //=============================================================================
@@ -88,16 +88,17 @@ void DetourScreen::EventMgrSend(void* This, void* pevent, unsigned int a)
     //not sure the meanings of the numbers but they seem to indicate:
     // 6 = world/zone -- player is in the game
     // 4 = world/zone -- player is no longer in the game
+    //LOGF("EventMgrSend: a= %d", a);
     if (a == 6)
     {
         inWorld_ = true;
         sDetourMain_->SetScreenEnable(true);
         IPCMessage::SendShortData(DataMsgType::ShowUI, 0);
-        LOGF("EventMgrSend 6\n");
+        //LOGF("EventMgrSend 6\n");
     }
     else if (a == 4)
     {
-        LOGF("EventMgrSend 4: showui=%d\n", showUI_);
+        //LOGF("EventMgrSend 4: showui=%d\n", showUI_);
 
         sDetourMain_->SetScreenEnable(false);
 

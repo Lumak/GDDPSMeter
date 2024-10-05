@@ -61,7 +61,8 @@ int main()
             GetCurrentDirectory(maxPathLen, path);
 
 #ifndef _RELEASE
-            std::string dllPath = std::string(path) + "\\" + CMAKE_INTDIR + "\\DPSMeter.dll";
+            std::string dllPath = std::string(path) + "\\DPSMeter.dll";
+            //std::string dllPath = std::string(path) + "\\" + CMAKE_INTDIR + "\\DPSMeter.dll";
 #else
             std::string dllPath = std::string(path) + "\\DPSMeter.dll";
 #endif

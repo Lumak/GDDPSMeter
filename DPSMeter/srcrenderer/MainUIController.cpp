@@ -1,3 +1,4 @@
+#include "MainImgui.h"
 #include "MainUIController.h"
 #include "CombatLog.h"
 #include "IPCMessage.h"
@@ -52,6 +53,7 @@ void MainUIController::SetFonts()
   //show options window on very first run
   if (io.IniFilename && !FileExists(io.IniFilename))
   {
+      LOGF("*** main ui setfont, show win");
     showWindow_ = true;
   }
 }
@@ -66,6 +68,11 @@ void MainUIController::QueryMessages(bool &menuShow)
   {
     switch (list[i].msg_)
     {
+    case DataMsgType::SetHwnWindow:
+      LOGF("QueryMessages  SetHwnWindow=0x%X", list[i].value_);
+      ImGuiMain::SetHwnWindow((void*)list[i].value_);
+      break;
+
     case DataMsgType::ShowUI:
       menuShow = (list[i].value_ == 1 ? true : false );
       break;
@@ -139,7 +146,7 @@ void MainUIController::DistributeHPRecoveryMsg(hpRecoveryData &hpRecovery)
 
 void MainUIController::CopyCheckbox(bool toSelf)
 {
-  bool checkboxes[8] = { 0 };
+  bool checkboxes[ImGuiCheckboxSize_Int8] = { 0 };
 
   if (toSelf)
   {
@@ -162,7 +169,7 @@ void MainUIController::CopyCheckbox(bool toSelf)
     checkboxes[4] = showDetailDamage_;
     checkboxes[5] = showDispelWarning_;
 
-    ImGui::SetCheckboxArray(OPTWIN_TITLE, checkboxes);
+    ImGui::SetCheckboxArray(OPTWIN_TITLE, checkboxes, ImGuiCheckboxSize_Int8);
   }
 }
 
@@ -198,9 +205,14 @@ void MainUIController::ShowWin(void* pd3dDevice)
   {
     buttonText.SetDevice(pd3dDevice);
   }
-  if (buttonText.GetTexture() == NULL)
+  if (buttonText.GetTexture() == NULL)  
   {
-    buttonText.LoadTextureFromResource(MAIN_MENU_BOTTON);
+      LOGF("load button resource");
+      buttonText.LoadTextureFromResource(MAIN_MENU_BOTTON);
+      if (buttonText.GetTexture() == NULL)
+      {
+          LOGF("button texture NULL");
+      }
   }
   ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | 
                                   ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground;
@@ -288,6 +300,7 @@ void MainUIController::ShowWin(void* pd3dDevice)
       dispelBuffsWarning_.SetMoveUI(moveUI_);
       dispelBuffsWarning_.ShowWin(showDispelWarning_);
   }
+
 }
 
 void MainUIController::Draw(const char* title, bool* p_open)

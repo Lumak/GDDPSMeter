@@ -49,10 +49,10 @@ private:
   //static vars
   static DetourScreen *sDetourScreen_;
 
-  static RealFunc<void, void*, void*, unsigned int> fnEventManagerSend_;
-  static RealFunc<void, void*, bool> fnPieOmaticSetWedgeMode_;
-  static RealFunc<void, void*> fnPieOmaticFadeIn_;
-  static RealFunc<void, void*> fnPieOmaticFadeOut_;
-  static RealFunc<void, void*, unsigned int&, unsigned int&, unsigned int&> fnGfxCanvasRenderStyledRect_;
+  static ThisFunc<void, void*, void*, unsigned int> fnEventManagerSend_;
+  static ThisFunc<void, void*, bool> fnPieOmaticSetWedgeMode_;
+  static ThisFunc<void, void*> fnPieOmaticFadeIn_;
+  static ThisFunc<void, void*> fnPieOmaticFadeOut_;
+  static ThisFunc<void, void*, unsigned int&, unsigned int&, unsigned int&> fnGfxCanvasRenderStyledRect_;
 };
 

@@ -15,6 +15,8 @@ class DetourScreen;
 
 //=============================================================================
 //=============================================================================
+#define SYM_PROCESSMSG_HWNDWINDOE "?SetCursor@WinWindow@GAME@@UAEXPAX@Z"
+#define SYM_GETSYSTEMWINDOW "?GetSystemWindow@WinWindow@GAME@@UBEPAUHWND__@@XZ"
 #define SYM_PLAYER_UPDATESELF "?UpdateSelf@Player@GAME@@UAEXH@Z"
 #define SYM_PLAYER_ONATTACK	"?OnAttack@Player@GAME@@UAEXPAVEntity@2@@Z"
 #define SYM_CHARBIO_TAKEBONUS "?TakeBonus@CharacterBio@GAME@@QAEXABVBonus@2@_N@Z"
@@ -110,6 +112,7 @@ private:
     void PreCharAttackTarget(void*, unsigned int, unsigned int&, unsigned int&, bool, unsigned int, unsigned int, unsigned int);
     void PostCharAttackTarget();
 
+    void ProcessMsgHwndWindow(void*, void*);
     void CalculateDPS(float damage);
     bool GetAttackDataSkillName(const AttackerDamageData &attackDamage, IPCData &ipcskill);
     void BuildAttackDamageData(const AttackerDamageData &damageData, float registeredDamage, std::vector<IPCData> &msgList);
@@ -131,6 +134,7 @@ private:
 
 public:
     //static fns
+    static void __fastcall DTProcessMsgHwndWindow(void*, void*, void*);
     static void __fastcall DTPlayerUpdateSelf(void*, void*, int);
     static void __fastcall DTPlayerOnAttack(void *This, void *, void *entity);
     static void __fastcall DTCharacterBioTakeBonus(void* This, void*, unsigned int &bonusRef, bool a);
@@ -159,6 +163,7 @@ private:
     bool screenEnabled_;
     bool childProcessSet_;
 
+    void *hwndWindow_;
     void *playerPtr_;
     unsigned int playerId_;
     void *playerSkillMgr_;
@@ -201,21 +206,24 @@ private:
     static DetourMain *sDetourMain_;
 
     // static fn vars
-	static RealFunc<void, void*, int> fnPlayerUpdateSelf_;
-	static RealFunc<void, void*, void*> fnPlayerOnAttack_;
-	static RealFunc<void, void*, unsigned int&, bool> fnCharacterBioTakeBonus_;
-	static RealFunc<bool, void*, unsigned int, unsigned int&, unsigned int&, bool, unsigned int, unsigned int, unsigned int> fnCharacterAttackTarget_;
+    static ThisFunc<void, void*, void*> fnProcessMsgHwndWindow_;
+    static ThisFunc<struct HWND__*, void*> fnGetSystemWindow_;
 
-	static RealFunc<float, void*, float> fnPlayerRegisterCombatTextHit_;
-	static RealFunc<float, void*, float> fnPlayerRegisterCombatTextCrit_;
-	static RealFunc<void, void*, unsigned int, unsigned int, float> fnGameEngineRegisterDamage_;
-	static RealFunc<bool, void*, float, unsigned int&, unsigned int, unsigned int&> fnCombatManagerApplyDamage_;
-	static RealFunc<bool, void*, unsigned int&, unsigned int&, unsigned int&> fnCombatManagerTakeDamage_;
+    static ThisFunc<void, void*, int> fnPlayerUpdateSelf_;
+	static ThisFunc<void, void*, void*> fnPlayerOnAttack_;
+	static ThisFunc<void, void*, unsigned int&, bool> fnCharacterBioTakeBonus_;
+	static ThisFunc<bool, void*, unsigned int, unsigned int&, unsigned int&, bool, unsigned int, unsigned int, unsigned int> fnCharacterAttackTarget_;
 
-	static RealFunc<int*, void*, unsigned int &> fnCombatAttribAccuExeDamage_;
-	static RealFunc<void, void*, bool, bool, unsigned int&> fnCtrlPlayerStateDfltRequestMoveAction_;
-	static RealFunc<void, void*, unsigned int&, unsigned int, unsigned int, unsigned int, bool> fnPlayerPostSpawnPet_;
-	static RealFunc<void, void*> fnCharCharacterIsDying_;
+	static ThisFunc<float, void*, float> fnPlayerRegisterCombatTextHit_;
+	static ThisFunc<float, void*, float> fnPlayerRegisterCombatTextCrit_;
+	static ThisFunc<void, void*, unsigned int, unsigned int, float> fnGameEngineRegisterDamage_;
+	static ThisFunc<bool, void*, float, unsigned int&, unsigned int, unsigned int&> fnCombatManagerApplyDamage_;
+	static ThisFunc<bool, void*, unsigned int&, unsigned int&, unsigned int&> fnCombatManagerTakeDamage_;
+
+	static ThisFunc<int*, void*, unsigned int &> fnCombatAttribAccuExeDamage_;
+	static ThisFunc<void, void*, bool, bool, unsigned int&> fnCtrlPlayerStateDfltRequestMoveAction_;
+	static ThisFunc<void, void*, unsigned int&, unsigned int, unsigned int, unsigned int, bool> fnPlayerPostSpawnPet_;
+	static ThisFunc<void, void*> fnCharCharacterIsDying_;
 };
 
 

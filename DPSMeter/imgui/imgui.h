@@ -270,6 +270,13 @@ struct ImVec4
 };
 IM_MSVC_RUNTIME_CHECKS_RESTORE
 
+enum ImGuiCheckboxSize_
+{
+    ImGuiCheckboxSize_Int8 = 8,
+    ImGuiCheckboxSize_Int16 = 16,
+    ImGuiCheckboxSize_Int32 = 32
+};
+
 //-----------------------------------------------------------------------------
 // [SECTION] Dear ImGui end-user API functions
 // (Note that ImGui:: being a namespace, you can add extra ImGui:: functions in your own separate file. Please don't modify imgui source files!)
@@ -500,7 +507,7 @@ namespace ImGui
     IMGUI_API bool          CheckboxFlags(const char* label, int* flags, int flags_value);
     IMGUI_API bool          CheckboxFlags(const char* label, unsigned int* flags, unsigned int flags_value);
     IMGUI_API void          GetCheckboxArray(const char* name, bool &checkbox);
-    IMGUI_API void          SetCheckboxArray(const char* name, bool [8]);
+    IMGUI_API void          SetCheckboxArray(const char* name, bool checkboxes[], int arrSize);
 
     IMGUI_API bool          RadioButton(const char* label, bool active);                    // use with e.g. if (RadioButton("one", my_value==1)) { my_value = 1; }
     IMGUI_API bool          RadioButton(const char* label, int* v, int v_button);           // shortcut to handle the above pattern when value is an integer

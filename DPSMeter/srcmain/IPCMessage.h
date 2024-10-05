@@ -12,6 +12,7 @@ enum DataMsgType
 {
   None,
   
+  SetHwnWindow,
   ShowUI,
   InputKey,
 

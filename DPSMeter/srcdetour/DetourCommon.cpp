@@ -42,6 +42,7 @@ bool DetourCommon::SetupDetour()
     status = HookDetour(datGetObjectId);
     fnGetObjectId_.SetFn(datGetObjectId.realFn_);
 
+
     status += HookDetour(datGetObjectName);
     fnObjectGetObjectName_.SetFn(datGetObjectName.realFn_);
 
@@ -196,12 +197,12 @@ const char* DetourCommon::GetSkillName(void* skillptr)
     return wcharbuff;
 }
 
-unsigned int& DetourCommon::CharGetSkillList(void *charPtr) const
+std::vector<unsigned int*>& DetourCommon::CharGetSkillList(void *charPtr) const
 {
     return fnCharacterGetSkillList_.Fn_(charPtr);
 }
 
-unsigned int& DetourCommon::SkillMgrGetItemSkillList(void *This) const
+std::vector<unsigned int*>& DetourCommon::SkillMgrGetItemSkillList(void *This) const
 {
     return fnSkillManagerGetItemSkillList_.Fn_(This);
 }
@@ -252,9 +253,9 @@ int DetourCommon::SkillGetCooldownRemaining(void* This) const
     return fnSkillGetCooldownRemaining_.Fn_(This);
 }
 
-float DetourCommon::SkillGetCooldownTime(void* This) const
+float DetourCommon::SkillGetCooldownTime(void* This, bool flag) const
 {
-    return fnSkillGetCooldownTime_.Fn_(This);
+    return fnSkillGetCooldownTime_.Fn_(This, flag);
 }
 
 int DetourCommon::SkillGetCooldownTotal(void* This) const

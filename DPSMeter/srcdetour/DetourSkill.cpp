@@ -31,19 +31,19 @@ DetourFnData datSkillServCharSendSkillActiveUpdate = { "game.dll", NULL, (VoidFn
 DetourFnData datSkillBuffDebufUpdate = { "game.dll", NULL, (VoidFn)&DetourSkill::DTSkillBuffDebufUpdate, SYM_SKILLBUFFDEBUF_UPDATE};
 DetourFnData datSkillBuffSetTimeToLive = { "game.dll", NULL, (VoidFn)&DetourSkill::DTSkillBuffSetTimeToLive, SYM_SKILLBUFF_SETTIMETOLIVE };
 
-RealFunc<void, void*, void*> DetourSkill::fnSkillBuffUnInstall_;
-RealFunc<void, void*, unsigned int&, unsigned int&, unsigned int, unsigned int&> DetourSkill::fnSkillBuffSelfDurationActivateNow_;
-RealFunc<void, void*> DetourSkill::fnCharacterDispelSkillBuffs_;
-RealFunc<void, void*> DetourSkill::fnSkillBuffSelfDurationRemoveSelfBuff_;
-RealFunc<unsigned int, void*> DetourSkill::fnSkillBuffGetParentSkillId_;
-RealFunc<void, void*, void*> DetourSkill::fnSkillBuffInstall_;
+ThisFunc<void, void*, void*> DetourSkill::fnSkillBuffUnInstall_;
+ThisFunc<void, void*, unsigned int&, unsigned int&, unsigned int, unsigned int&> DetourSkill::fnSkillBuffSelfDurationActivateNow_;
+ThisFunc<void, void*> DetourSkill::fnCharacterDispelSkillBuffs_;
+ThisFunc<void, void*> DetourSkill::fnSkillBuffSelfDurationRemoveSelfBuff_;
+ThisFunc<unsigned int, void*> DetourSkill::fnSkillBuffGetParentSkillId_;
+ThisFunc<void, void*, void*> DetourSkill::fnSkillBuffInstall_;
 
-RealFunc<void, void*, unsigned int&, unsigned int&, unsigned int, unsigned int&, unsigned int&> DetourSkill::fnSkillActivateSecondarySkill_;
-RealFunc<void, void *, unsigned int&> DetourSkill::fnSkillPrimaryStopSecondarySkills_;
+ThisFunc<void, void*, unsigned int&, unsigned int&, unsigned int, unsigned int&, unsigned int&> DetourSkill::fnSkillActivateSecondarySkill_;
+ThisFunc<void, void *, unsigned int&> DetourSkill::fnSkillPrimaryStopSecondarySkills_;
 
-RealFunc<void, void*, void*, unsigned int&> DetourSkill::fnSkillServicesCharacterSendSkillActiveUpdate_;
-RealFunc<void, void*, unsigned int&, int> DetourSkill::fnSkillBuffDebufUpdate_;
-RealFunc<void, void*, int> DetourSkill::fnSkillBuffSetTimeToLive_;
+ThisFunc<void, void*, void*, unsigned int&> DetourSkill::fnSkillServicesCharacterSendSkillActiveUpdate_;
+ThisFunc<void, void*, unsigned int&, int> DetourSkill::fnSkillBuffDebufUpdate_;
+ThisFunc<void, void*, int> DetourSkill::fnSkillBuffSetTimeToLive_;
 
 
 DetourSkill *DetourSkill::sDetourSkill_ = NULL;
@@ -288,15 +288,42 @@ void DetourSkill::SetSkillMap()
 {
     if (skillMap_.size() == 0)
     {
-        DLOG(LogSkillBase,"SetSkillMap:\n");
+        DLOG(LogSkillBase, "SetSkillMap:\n");
 
-        //README!!!
-        //what's returned from CharacterGetSkillList is nothing like a vector<> list 
-        //but an array of skill ptrs to all skills available for every player/class
-        //**parse this as an array of: unsigned int *skillptr[] until invalid record is seen
 		consumableSkillList_.clear();
 
-        unsigned int &skillList = pDetourCommon_->CharGetSkillList(playerPtr_);
+        std::vector<unsigned int*> &vskillList = pDetourCommon_->CharGetSkillList(playerPtr_);
+        //std::vector<unsigned int*> &vskillList = *(std::vector<unsigned int*>*)&skillList;
+        LOGF("SetSkillMap() vec size=%u", vskillList.size());
+
+        for (unsigned i = 0; i < vskillList.size(); ++i)
+        {
+            unsigned int* uskptr = vskillList[i];
+            std::string recStr = (const char*)uskptr[1];
+
+            if (recStr.find("skills") != std::string::npos)
+            {
+                unsigned int uskillId = pDetourCommon_->GetObjectId(uskptr);
+
+                //not storing consumable skills
+                if (recStr.find("consumable") == std::string::npos)
+                {
+                    skillMap_[uskillId] = uskptr;
+
+                    if (recStr.find("devotion") != std::string::npos)
+                    {
+                        devSkillMap_[uskillId] = uskptr;
+                    }
+                }
+                else
+                {
+                    consumableSkillList_.push_back(uskillId);
+                }
+
+                //DLOG(LogSkillBase, "[%04u]id=%u, %s\n", i, uskillId, recStr.c_str());
+            }
+        }
+#if 0
         unsigned int *skillArray = (unsigned int*)skillList;
         unsigned int skillId = 0;
         DLOG(LogSkillBase,"  skillList=0x%X\n", skillList);
@@ -325,6 +352,7 @@ void DetourSkill::SetSkillMap()
             if (recStr.find("skills") != std::string::npos)
             {
                 skillId = pDetourCommon_->GetObjectId(skptr);
+                //DLOG(LogSkillBase, "  %s\n", recStr.c_str());
 
                 //not storing consumable skills in the skillmap
                 if (recStr.find("consumable") == std::string::npos)
@@ -347,6 +375,7 @@ void DetourSkill::SetSkillMap()
                 break;
             }
         }
+#endif
         DLOG(LogSkillBase,"  total %d\n", skillMap_.size());
 
         //get item skills
@@ -367,34 +396,37 @@ void DetourSkill::SetItemSkillMap()
             return;
         }
 
-        unsigned int &skillList = pDetourCommon_->SkillMgrGetItemSkillList(skillMgr);
-        unsigned int *skillArray = (unsigned int*)skillList;
+        std::vector<unsigned int*> &skillList = pDetourCommon_->SkillMgrGetItemSkillList(skillMgr);
         unsigned int skillId = 0;
+        LOGF("  item skill list size=%u", skillList.size());
 
-        if (skillList == 0)
+        if (skillList.size() == 0)
         {
             DLOG(LogSkillBase,"  skillList=%d, total = 0\n", skillList);
             return;
         }
 
         // max size is unknown but should be a few dozen if that
-        for (unsigned int i = 0; i < 100; ++i)
+        for (unsigned int i = 0; i < skillList.size(); ++i)
         {
-            bool memvalid = DetourUtil::MemValidity((void*)skillArray[i]);
+            //bool memvalid = DetourUtil::MemValidity((void*)skillArray[i]);
             
-			if (!memvalid)
-            {
-                DLOG(LogSkillBase,"  [%i]item skill bad mem\n", i);
-                break;
-            }
+			//if (!memvalid)
+            //{
+            //    DLOG(LogSkillBase,"  [%i]item skill bad mem\n", i);
+            //    break;
+            //}
+            //unsigned int* uskptr = skillList[i];
+            //std::string recStr = (const char*)uskptr[1];
 
-            unsigned int *skptr = (unsigned int*)skillArray[i];
-            memvalid = DetourUtil::MemValidity((void*)skptr[1]);
-            if (skptr[1] == 0 || !memvalid)
-            {
-                DLOG(LogSkillBase,"  .[%i]item skill bad mem\n", i);
-                break;
-            }
+
+            unsigned int *skptr = (unsigned int*)skillList[i];
+            //memvalid = DetourUtil::MemValidity((void*)skptr[1]);
+            //if (skptr[1] == 0 || !memvalid)
+            //{
+             //   DLOG(LogSkillBase,"  .[%i]item skill bad mem\n", i);
+             //   break;
+            //}
             const char *recordPtr = (const char*)skptr[1];
             std::string recStr = recordPtr;
 

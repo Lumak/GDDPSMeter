@@ -33,28 +33,6 @@ int DetourBase::HookDetour(DetourFnData &detour)
 
     return error;
 }
-int DetourBase::HookDetour(DetourFnNormalData &detour)
-{
-    int error = 0;
-
-    detour.realFn_ = (VoidFn)DetourFindFunction(detour.dllName_, detour.mangleName_);
-
-    if (detour.realFn_ == NULL)
-    {
-        return -1;
-    }
-
-    if (detour.detourFn_)
-    {
-        DetourTransactionBegin();
-        DetourUpdateThread(GetCurrentThread());
-        DetourAttach((PVOID*)&detour.realFn_, detour.detourFn_);
-        error = DetourTransactionCommit();
-        if (error < 0) error = -error;
-    }
-
-    return error;
-}
 
 void DetourBase::SetError(const char *err)
 {

@@ -1200,7 +1200,7 @@ void ImGui::GetCheckboxArray(const char* name, bool &checkbox)
   }
 }
 
-void ImGui::SetCheckboxArray(const char* name, bool checkboxes[8])
+void ImGui::SetCheckboxArray(const char* name, bool checkboxes[], int arrSize)
 {
   ImGuiContext& g = *GImGui;
   const ImGuiStyle& style = g.Style;
@@ -1210,7 +1210,7 @@ void ImGui::SetCheckboxArray(const char* name, bool checkboxes[8])
 
   // Find or create
   ImGuiWindow* window = FindWindowByName(name);
-  for (int i = 0; i < 8; ++i)
+  for (int i = 0; i < arrSize; ++i)
   {
     if (window->Checkbox[i] != checkboxes[i])
     {

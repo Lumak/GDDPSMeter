@@ -23,6 +23,9 @@
 
 //=============================================================================
 //=============================================================================
+DetourFnData datProcessMsgHwndWindow = { "engine.dll", NULL, (VoidFn)&DetourMain::DTProcessMsgHwndWindow, SYM_PROCESSMSG_HWNDWINDOE };
+DetourFnData datGetSystemWindow = { "engine.dll", NULL, NULL, SYM_GETSYSTEMWINDOW };
+
 DetourFnData datPlayerUpdateSelf = { "game.dll", NULL, (VoidFn)&DetourMain::DTPlayerUpdateSelf, SYM_PLAYER_UPDATESELF };
 DetourFnData datPlayerOnAttack = { "game.dll", NULL, (VoidFn)&DetourMain::DTPlayerOnAttack, SYM_PLAYER_ONATTACK };
 DetourFnData datCharBioTakeBonus = { "game.dll", NULL, (VoidFn)&DetourMain::DTCharacterBioTakeBonus, SYM_CHARBIO_TAKEBONUS };
@@ -41,21 +44,24 @@ DetourFnData datCtrlPlayerRequestMoveAction = { "game.dll", NULL, (VoidFn)&Detou
 DetourFnData datPlayerPostSpawnPet = { "game.dll", NULL, (VoidFn)&DetourMain::DTPlayerPostSpawnPet, SYM_PLAYER_POSTSPAWNPET };
 DetourFnData datCharCharacterIsDying = { "game.dll", NULL, (VoidFn)&DetourMain::DTCharCharacterIsDying, SYM_CHAR_CHARACTERISDYING };
 
-RealFunc<void, void*, int> DetourMain::fnPlayerUpdateSelf_;
-RealFunc<void, void*, void*> DetourMain::fnPlayerOnAttack_;
-RealFunc<void, void*, unsigned int&, bool> DetourMain::fnCharacterBioTakeBonus_;
-RealFunc<bool, void*, unsigned int, unsigned int&, unsigned int&, bool, unsigned int, unsigned int, unsigned int> DetourMain::fnCharacterAttackTarget_;
+ThisFunc<void, void*, void*> DetourMain::fnProcessMsgHwndWindow_;
+ThisFunc<struct HWND__*, void*> DetourMain::fnGetSystemWindow_;
 
-RealFunc<float, void*, float> DetourMain::fnPlayerRegisterCombatTextHit_;
-RealFunc<float, void*, float> DetourMain::fnPlayerRegisterCombatTextCrit_;
-RealFunc<void, void*, unsigned int, unsigned int, float> DetourMain::fnGameEngineRegisterDamage_;
-RealFunc<bool, void*, float, unsigned int&, unsigned int, unsigned int&> DetourMain::fnCombatManagerApplyDamage_;
-RealFunc<bool, void*, unsigned int&, unsigned int&, unsigned int&> DetourMain::fnCombatManagerTakeDamage_;
+ThisFunc<void, void*, int> DetourMain::fnPlayerUpdateSelf_;
+ThisFunc<void, void*, void*> DetourMain::fnPlayerOnAttack_;
+ThisFunc<void, void*, unsigned int&, bool> DetourMain::fnCharacterBioTakeBonus_;
+ThisFunc<bool, void*, unsigned int, unsigned int&, unsigned int&, bool, unsigned int, unsigned int, unsigned int> DetourMain::fnCharacterAttackTarget_;
 
-RealFunc<int*, void*, unsigned int &> DetourMain::fnCombatAttribAccuExeDamage_;
-RealFunc<void, void*, bool, bool, unsigned int&> DetourMain::fnCtrlPlayerStateDfltRequestMoveAction_;
-RealFunc<void, void*, unsigned int&, unsigned int, unsigned int, unsigned int, bool> DetourMain::fnPlayerPostSpawnPet_;
-RealFunc<void, void*> DetourMain::fnCharCharacterIsDying_;
+ThisFunc<float, void*, float> DetourMain::fnPlayerRegisterCombatTextHit_;
+ThisFunc<float, void*, float> DetourMain::fnPlayerRegisterCombatTextCrit_;
+ThisFunc<void, void*, unsigned int, unsigned int, float> DetourMain::fnGameEngineRegisterDamage_;
+ThisFunc<bool, void*, float, unsigned int&, unsigned int, unsigned int&> DetourMain::fnCombatManagerApplyDamage_;
+ThisFunc<bool, void*, unsigned int&, unsigned int&, unsigned int&> DetourMain::fnCombatManagerTakeDamage_;
+
+ThisFunc<int*, void*, unsigned int &> DetourMain::fnCombatAttribAccuExeDamage_;
+ThisFunc<void, void*, bool, bool, unsigned int&> DetourMain::fnCtrlPlayerStateDfltRequestMoveAction_;
+ThisFunc<void, void*, unsigned int&, unsigned int, unsigned int, unsigned int, bool> DetourMain::fnPlayerPostSpawnPet_;
+ThisFunc<void, void*> DetourMain::fnCharCharacterIsDying_;
 
 DetourMain *DetourMain::sDetourMain_ = NULL;
 //=============================================================================
@@ -101,6 +107,7 @@ DetourMain::DetourMain()
 {
     Logger::SetLogLevel(LogCombatMgr | LogCharAttack | LogSkillBase);
 
+    hwndWindow_ = NULL;
     playerPtr_ = NULL;
     playerId_ = 0;
     playerSkillMgr_ = NULL;
@@ -154,8 +161,14 @@ bool DetourMain::SetupDetour()
 {
     int status = 0;
 
-    status = HookDetour(datPlayerUpdateSelf);
-	fnPlayerUpdateSelf_.SetFn(datPlayerUpdateSelf.realFn_);
+    status = HookDetour(datProcessMsgHwndWindow);
+    fnProcessMsgHwndWindow_.SetFn(datProcessMsgHwndWindow.realFn_);
+
+    status = HookDetour(datGetSystemWindow);
+    fnGetSystemWindow_.SetFn(datGetSystemWindow.realFn_);
+
+    status += HookDetour(datPlayerUpdateSelf);
+    fnPlayerUpdateSelf_.SetFn(datPlayerUpdateSelf.realFn_);
 
     status += HookDetour(datCharacterAttackTarget);
     fnCharacterAttackTarget_.SetFn(datCharacterAttackTarget.realFn_);
@@ -240,6 +253,17 @@ void DetourMain::UpdateSubClasses(void *player, int idx)
     for (unsigned i = 0; i < subDetourClassList_.size(); ++i)
     {
         subDetourClassList_[i]->Update(player, idx);
+    }
+}
+
+void DetourMain::ProcessMsgHwndWindow(void *This, void *canvass)
+{
+    struct HWND__* hwnd = fnGetSystemWindow_.Fn_(This);
+
+    if (hwndWindow_ = hwnd)
+    {
+        hwndWindow_ = hwnd;
+        IPCMessage::SendShortData(DataMsgType::SetHwnWindow, (unsigned int)hwndWindow_);
     }
 }
 
@@ -911,7 +935,6 @@ void DetourMain::PlayerPostSpawnPet(void* This, unsigned int& ve3Ref, unsigned i
 
 void DetourMain::CharCharacterIsDying(void* This)
 {
-
     //notify
     if (This == playerPtr_)
     {
@@ -939,14 +962,22 @@ void DetourMain::CharCharacterIsDying(void* This)
 //==============================================================
 // static fns
 //==============================================================
+void DetourMain::DTProcessMsgHwndWindow(void* This, void*, void *canvass)
+{
+    DBGLOG("DTProcessMsgHwndWindow\n");
+    sDetourMain_->ProcessMsgHwndWindow(This, canvass);
+
+    fnProcessMsgHwndWindow_.Fn_(This, canvass);
+    DBGLOG("end DTProcessMsgHwndWindow\n");
+}
+
 void DetourMain::DTPlayerUpdateSelf(void* This, void*, int proc)
 {
-	DBGLOG("DTPlayerUpdateSelf\n");
+    DBGLOG("DTPlayerUpdateSelf\n");
     sDetourMain_->Update(This, proc);
 
-    //fnPlayerUpdateSelf_(This, proc);
-	fnPlayerUpdateSelf_.Fn_(This, proc);
-	DBGLOG("end DTPlayerUpdateSelf\n");
+    fnPlayerUpdateSelf_.Fn_(This, proc);
+    DBGLOG("end DTPlayerUpdateSelf\n");
 }
 
 void DetourMain::DTPlayerOnAttack(void *This, void *, void *entity)

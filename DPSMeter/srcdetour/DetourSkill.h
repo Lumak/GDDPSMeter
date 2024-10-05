@@ -170,26 +170,26 @@ private:
     std::map<unsigned int, petData> petSkillMap_;
 
 	//fn var
-	RealFunc<unsigned int &, void*> fnSkillGetSecondarySkills_;
-	RealFunc<void*, void*> fnSkillGetManager_;
-	RealFunc<void*, void*> fnSkillManagerGetParent_;
-	RealFunc<unsigned int &, void*> fnSkillGetBaseSkills_;
+	ThisFunc<unsigned int &, void*> fnSkillGetSecondarySkills_;
+	ThisFunc<void*, void*> fnSkillGetManager_;
+	ThisFunc<void*, void*> fnSkillManagerGetParent_;
+	ThisFunc<unsigned int &, void*> fnSkillGetBaseSkills_;
 
     //self static var
     static DetourSkill *sDetourSkill_;
 
 	//static fn vars
-	static RealFunc<void, void*, void*> fnSkillBuffInstall_;
-	static RealFunc<void, void*, void*> fnSkillBuffUnInstall_;
-	static RealFunc<void, void*, unsigned int&, unsigned int&, unsigned int, unsigned int&> fnSkillBuffSelfDurationActivateNow_;
-	static RealFunc<void, void*> fnCharacterDispelSkillBuffs_;
-	static RealFunc<void, void*> fnSkillBuffSelfDurationRemoveSelfBuff_;
-	static RealFunc<unsigned int, void*> fnSkillBuffGetParentSkillId_;
+	static ThisFunc<void, void*, void*> fnSkillBuffInstall_;
+	static ThisFunc<void, void*, void*> fnSkillBuffUnInstall_;
+	static ThisFunc<void, void*, unsigned int&, unsigned int&, unsigned int, unsigned int&> fnSkillBuffSelfDurationActivateNow_;
+	static ThisFunc<void, void*> fnCharacterDispelSkillBuffs_;
+	static ThisFunc<void, void*> fnSkillBuffSelfDurationRemoveSelfBuff_;
+	static ThisFunc<unsigned int, void*> fnSkillBuffGetParentSkillId_;
 
-	static RealFunc<void, void*, unsigned int&, unsigned int&, unsigned int, unsigned int&, unsigned int&> fnSkillActivateSecondarySkill_;
-	static RealFunc<void, void *, unsigned int&> fnSkillPrimaryStopSecondarySkills_;
-	static RealFunc<void, void*, void*, unsigned int&> fnSkillServicesCharacterSendSkillActiveUpdate_;
+	static ThisFunc<void, void*, unsigned int&, unsigned int&, unsigned int, unsigned int&, unsigned int&> fnSkillActivateSecondarySkill_;
+	static ThisFunc<void, void *, unsigned int&> fnSkillPrimaryStopSecondarySkills_;
+	static ThisFunc<void, void*, void*, unsigned int&> fnSkillServicesCharacterSendSkillActiveUpdate_;
 
-	static RealFunc<void, void*, unsigned int&, int> fnSkillBuffDebufUpdate_;
-	static RealFunc<void, void*, int> fnSkillBuffSetTimeToLive_;
+	static ThisFunc<void, void*, unsigned int&, int> fnSkillBuffDebufUpdate_;
+	static ThisFunc<void, void*, int> fnSkillBuffSetTimeToLive_;
 };

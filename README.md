@@ -2,6 +2,10 @@
 GD DPS Meter
 
 DPS Meter designed for Grim Dawn, for Win32 x86.
+NOTE: GD DPSMeter will not work in fullscreen mode.
+
+Update:
+-10/05/24 updated for GD v1.2.1.2
 
 To Build
 -----------------------------------------------------------------------------------

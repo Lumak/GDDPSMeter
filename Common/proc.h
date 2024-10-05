@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2022 the TQModRuntime project.
+// Copyright (c) 2022 the GDDPSMeter project.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -34,5 +34,6 @@ BOOL ModulePathContainsPattern(DWORD procId, const wchar_t* modName, const wchar
 uintptr_t GetBaseModuleHandle(DWORD procId, const wchar_t* modName);
 DWORD GetThreadId(DWORD procId);
 bool SuspendResumeProcess(DWORD processId, bool suspend);
+uintptr_t GetProcAddressRemote(DWORD procId, BOOL is64BitProcess, const wchar_t* modName, std::string &functionName);
 
 

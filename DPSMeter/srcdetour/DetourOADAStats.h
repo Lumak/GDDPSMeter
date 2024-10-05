@@ -26,13 +26,13 @@ public:
   void SetPlayerInWorld(bool inworld);
 
 private:
-	RealFunc<unsigned int&, void*> fnCharacterGetPlayStats_;
-	RealFunc<void, void*, unsigned int&, float&> fnPlayStatsGetLastMonsterHit_;
-	RealFunc<void, void*, unsigned int&, float&> fnPlayStatsGetLastMonsterHitBy_;
-	RealFunc<float, void*, float> fnCharacterDesignerCalculateOffensiveAbility_;
-	RealFunc<float, void*, float> fnCharacterDesignerCalculateDefensiveAbility_;
-	RealFunc<float, void*, float, float> fnCharacterDesignerCalculateProbabilityToHit_;
-	RealFunc<float, void*, float> fnCharacterDesignerCalculateCriticalChance_;
+	ThisFunc<unsigned int&, void*> fnCharacterGetPlayStats_;
+	ThisFunc<void, void*, unsigned int&, float&> fnPlayStatsGetLastMonsterHit_;
+	ThisFunc<void, void*, unsigned int&, float&> fnPlayStatsGetLastMonsterHitBy_;
+	ThisFunc<float, void*, float> fnCharacterDesignerCalculateOffensiveAbility_;
+	ThisFunc<float, void*, float> fnCharacterDesignerCalculateDefensiveAbility_;
+	ThisFunc<float, void*, float, float> fnCharacterDesignerCalculateProbabilityToHit_;
+	ThisFunc<float, void*, float> fnCharacterDesignerCalculateCriticalChance_;
 
 	void* playerPtr_;
 	bool initialized_;
